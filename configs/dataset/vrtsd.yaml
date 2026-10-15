@@ -1,64 +1,27 @@
-path: C:/Users/Dell Precision 5820/OneDrive/Desktop/chi_Tam_yolo11n/trafic/datasets
+# Dataset configuration for VR-TSD v2 (Roboflow Universe)
+path: D:/user/projects/Trafic/datasets/VR-TSD-2
 train: train/images
 val: valid/images
 test: test/images
 
-names:
-  0: class_0
-  1: class_1
-  2: class_2
-  3: class_3
-  4: class_4
-  5: class_5
-  6: class_6
-  7: class_7
-  8: class_8
-  9: class_9
-  10: class_10
-  11: class_11
-  12: class_12
-  13: class_13
-  14: class_14
-  15: class_15
-  16: class_16
-  17: class_17
-  18: class_18
-  19: class_19
-  20: class_20
-  21: class_21
-  22: class_22
-  23: class_23
-  24: class_24
-  25: class_25
-  26: class_26
-  27: class_27
-  28: class_28
-  29: class_29
-  30: class_30
-  31: class_31
-  32: class_32
-  33: class_33
-  34: class_34
-  35: class_35
-  36: class_36
-  37: class_37
-  38: class_38
-  39: class_39
-  40: class_40
-  41: class_41
-  42: class_42
-  43: class_43
-  44: class_44
-  45: class_45
-  46: class_46
-  47: class_47
-  48: class_48
-  49: class_49
-  50: class_50
-  51: class_51
-  52: class_52
-  53: class_53
-  54: class_54
-  55: class_55
-  56: class_56
-  57: class_57
+nc: 58
+names: [
+  '102-cam-di-nguoc-chieu', '103a-cam-oto', '103b-cam-oto-re-phai', '103c-cam-oto-re-trai',
+  '106-cam-oto-tai', '107-cam-oto-khach-va-oto-tai', '123a-cam-re-trai', '123b-cam-re-phai',
+  '124a-cam-quay-dau-xe', '124b-cam-oto-quay-dau-xe', '124c-cam-re-trai-va-cam-quay-dau-xe',
+  '125-cam-vuot', '127-toc-do-toi-da-100', '127-toc-do-toi-da-20', '127-toc-do-toi-da-30',
+  '127-toc-do-toi-da-40', '127-toc-do-toi-da-50', '127-toc-do-toi-da-60', '127-toc-do-toi-da-70',
+  '127-toc-do-toi-da-80', '127-toc-do-toi-da-90', '128-cam-su-dung-coi', '130-cam-dung-va-do-xe',
+  '131a-cam-do-xe', '131b-cam-do-xe-ngay-le', '131c-cam-do-xe-ngay-chan', '133-het-cam-vuot',
+  '134-het-han-che-toc-do-toi-da', '135-het-tat-ca-cac-lenh-cam', '136-cam-di-thang',
+  '137-cam-re-trai-va-re-phai', '201-cho-ngoat-nguy-hiem', '203-duong-bi-hep',
+  '205-duong-giao-nhau', '207-giao-nhau-voi-duong-khong-uu-tien', '208-giao-nhau-voi-duong-uu-tien',
+  '209-giao-nhau-co-tin-hieu-den', '221-duong-go-ghe', '224-duong-nguoi-di-bo-cat-ngang',
+  '225-chu-y-tre-em', '227-cong-truong', '245-di-cham', '301a-cac-xe-chi-duoc-di-thang',
+  '301b-cac-xe-chi-duoc-re-phai', '301c-cac-xe-chi-duoc-re-trai', '301d-cac-xe-chi-duoc-re-phai-2',
+  '301e-cac-xe-chi-duoc-re-trai-2', '301h-cac-xe-chi-duoc-di-thang-va-re-trai',
+  '302a-huong-phai-di-vong-chuong-ngai-vat-1', '303-noi-giao-nhau-chay-theo-vong-xuyen',
+  '306-toc-do-toi-thieu-60', '407a-duong-mot-chieu', '420-bat-dau-khu-dong-dan-cu',
+  '421-ket-thuc-khu-dong-dan-cu', '423a-duong-nguoi-di-bo-sang-ngang-1', '437-bat-dau-duong-cao-toc',
+  '438-ket-thuc-duong-cao-toc', '442-cho'
+]
