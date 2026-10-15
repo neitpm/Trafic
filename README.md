@@ -21,42 +21,44 @@ This repository explores modifying the standard **YOLO11n** architecture by repl
 
 ## 2. Model Architectures & Parameter Profiling
 
-The repository evaluates two distinct model configurations:
+The repository evaluates two distinct model configurations (parameters verified directly from fused model checkpoints via `scripts/benchmark_latency.py`):
 
 | Architectural Property | Baseline (YOLO11n) | Proposed Variant (YOLO11n-UIB-P2) | Structural Notes |
 | :--- | :---: | :---: | :--- |
 | **Backbone Stages** | Standard CSPDarknet (Conv + C3k2) | **Custom UIB & UIBDown Blocks** | Depthwise conv + Expansion ($e=6.0$) + Squeeze-and-Excitation |
 | **Detection Heads** | 3 scales (P3, P4, P5) | **4 scales (P2, P3, P4, P5)** | Added high-resolution P2 head for small traffic sign localization |
-| **Total Parameters** | **2,593,657 (~2.59M)** | **31,948,198 (~31.95M)** | Higher capacity variant (~12.3x parameter expansion) |
+| **Fused Model Parameters** | **2,593,657 (~2.59M)** | **31,948,198 (~31.95M)** | Higher capacity variant (~12.3x parameter expansion) |
+| **Fused Layers** | **100 layers** | **348 layers** | Deep inverted bottleneck topology |
 | **GFLOPs (fused @ 640x640)** | **6.4 GFLOPs** | **52.9 GFLOPs** | ~8.2x computational workload |
 | **Weights File Size** | **5.25 MB** | **61.96 MB** | PyTorch serialized checkpoint |
 
 > **Important Architectural Note:**  
-> While the baseline model operates as a true lightweight detector (~2.6M parameters), the custom UIB variant was designed with wider channel dimensions (64 -> 128 -> 256 -> 512) and an additional P2 high-resolution detection head. Consequently, the UIB variant functions as a **higher-capacity, accuracy-oriented model** rather than an edge-nano detector.
+> While the baseline model operates as a true lightweight detector (~2.59M parameters), the custom UIB variant was designed with wider channel dimensions (64 -> 128 -> 256 -> 512) and an additional P2 high-resolution detection head. Consequently, the UIB variant functions as a **higher-capacity, accuracy-oriented model** rather than an edge-nano detector.
 
 ---
 
 ## 3. Rigorous Profiling & Latency Benchmark
 
-To ensure scientific honesty and avoid latency misreporting, profiling was conducted under identical hardware conditions with `torch.set_num_threads(4)`, Conv+BatchNorm layer fusion (`model.fuse()`), and hardware-synchronized timing using `torch.cuda.Event`.
+To ensure scientific honesty and consistency between reported documentation and artifacts, profiling is generated directly by `scripts/benchmark_latency.py` and saved to `benchmark_latency_results.json`. Both models were evaluated as fused modules (`model.fuse()`), using `torch.set_num_threads(4)` on CPU and hardware-synchronized timing via `torch.cuda.Event` on GPU.
 
 - **Benchmark Environment:**
   - **OS:** Windows 11 (10.0.26200)
   - **GPU:** NVIDIA GeForce RTX 5060 Ti (15.93 GB VRAM)
   - **CUDA:** 12.8 | **cuDNN:** 92000
   - **PyTorch:** 2.12.0.dev+cu128 | **Ultralytics:** 8.4.177
+  - **Environment Pinning:** See [`requirements-lock.txt`](requirements-lock.txt)
 
-### Model Inference Latency (Batch Size = 1, Fused Models)
+### Model Inference Latency (Batch Size = 1, Fused Models, Synchronized)
 
-| Target Hardware | Resolution | Metric | Baseline (2.6M params) | UIB Variant (31.9M params) |
+| Target Hardware | Resolution | Metric | Baseline (`yolo11n_baseline_best.pt`) | UIB Variant (`yolo11n_uib_best.pt`) |
 | :--- | :---: | :--- | :---: | :---: |
-| **GPU RTX 5060 Ti** | **640x640** | **Mean ± Std**<br>Median (p50) / p95<br>**Throughput (FPS)** | **6.40 ± 1.95 ms**<br>5.75 ms / 9.92 ms<br>**156.2 FPS** | **17.17 ± 0.79 ms**<br>17.10 ms / 18.13 ms<br>**58.2 FPS** |
-| **GPU RTX 5060 Ti** | **832x832** | **Mean ± Std**<br>Median (p50) / p95<br>**Throughput (FPS)** | **5.56 ± 0.76 ms**<br>5.40 ms / 6.68 ms<br>**179.9 FPS** *(GPU underutilized)* | **27.48 ± 0.49 ms**<br>27.54 ms / 28.22 ms<br>**36.4 FPS** |
-| **CPU (4 threads)** | **640x640** | **Mean ± Std**<br>Median (p50) / p95<br>**Throughput (FPS)** | **46.10 ± 10.02 ms**<br>46.49 ms / 61.20 ms<br>**21.7 FPS** | **405.64 ± 31.69 ms**<br>399.85 ms / 453.89 ms<br>**2.5 FPS** |
+| **GPU RTX 5060 Ti** | **640x640** | **Mean ± Std**<br>Median (p50) / p95<br>**Throughput (FPS)** | **5.21 ± 0.72 ms**<br>4.99 ms / 6.54 ms<br>**192.0 FPS** | **16.43 ± 1.03 ms**<br>16.10 ms / 18.84 ms<br>**60.9 FPS** |
+| **GPU RTX 5060 Ti** | **832x832** | **Mean ± Std**<br>Median (p50) / p95<br>**Throughput (FPS)** | **5.19 ± 0.67 ms**<br>4.98 ms / 6.72 ms<br>**192.8 FPS** *(GPU underutilized)* | **26.26 ± 0.27 ms**<br>26.20 ms / 26.72 ms<br>**38.1 FPS** |
+| **CPU (4 threads)** | **640x640** | **Mean ± Std**<br>Median (p50) / p95<br>**Throughput (FPS)** | **30.29 ± 2.57 ms**<br>29.43 ms / 35.32 ms<br>**33.0 FPS** | **468.10 ± 85.15 ms**<br>426.12 ms / 633.64 ms<br>**2.1 FPS** |
 
 *Hardware Profiling Observations:*
-1. **GPU Throughput:** On an RTX 5060 Ti, the UIB variant sustains **58.2 FPS** at 640x640 and **36.4 FPS** at 832x832, comfortably meeting real-time camera streaming thresholds for workstation deployment.
-2. **CPU Scalability:** On CPU inference, the baseline executes at **21.7 FPS**, whereas the 32M-parameter UIB model requires **~405 ms per frame (2.5 FPS)**, demonstrating the strict trade-off of the added capacity.
+1. **GPU Throughput:** On an RTX 5060 Ti workstation, the higher-capacity UIB variant comfortably sustains **60.9 FPS** at 640x640 and **38.1 FPS** at 832x832, suitable for real-time video stream ingestion.
+2. **CPU Scalability:** On CPU inference, the baseline model achieves **33.0 FPS**, while the 32M-parameter UIB model requires **~468 ms per frame (2.1 FPS)**, confirming the strict computational cost of the expanded backbone.
 
 ---
 
@@ -87,8 +89,8 @@ Trafic/
 │   └── models/
 │       └── yolo11n_uib_backbone.yaml # Custom UIB architecture definition
 ├── weights/
-│   ├── yolo11n_baseline_best.pt   # Serialized baseline checkpoint (2.6M params)
-│   └── yolo11n_uib_best.pt        # Serialized UIB variant checkpoint (31.9M params)
+│   ├── yolo11n_baseline_best.pt   # Serialized baseline checkpoint (2.59M params, 5.25 MB)
+│   └── yolo11n_uib_best.pt        # Serialized UIB variant checkpoint (31.95M params, 61.96 MB)
 ├── scripts/
 │   ├── benchmark_latency.py       # Hardware-synchronized latency and FPS profiling
 │   ├── eval/                      # Validation and test evaluation scripts
@@ -100,7 +102,9 @@ Trafic/
 ├── tests/
 │   └── test_uib.py                # Unit tests for UIB tensor math and checkpoint loading
 ├── app.py                         # Streamlit real-time interactive demo web app
-└── requirements.txt               # Environment dependencies
+├── requirements.txt               # Main dependencies
+├── requirements-lock.txt          # Pinned exact environment freeze
+└── LICENSE                        # MIT License
 ```
 
 ---
@@ -121,11 +125,13 @@ python -m venv venv
 # source venv/bin/activate
 
 pip install -r requirements.txt
+# To reproduce the exact profiling environment:
+# pip install -r requirements-lock.txt
 ```
 
 ### 2. Run Technical Unit Tests
 
-Verify UIB residual logic, stride downsampling, and checkpoint loading:
+Verify UIB residual logic, stride downsampling, checkpoint loading, and end-to-end NMS predict pipeline:
 
 ```bash
 python -m unittest tests/test_uib.py

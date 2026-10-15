@@ -1,6 +1,7 @@
 import sys
 import unittest
 from pathlib import Path
+import numpy as np
 import torch
 import torch.nn as nn
 
@@ -21,7 +22,7 @@ class TestUIBBlock(unittest.TestCase):
         b, c, h, w = 2, 64, 32, 32
         x = torch.randn(b, c, h, w, device=self.device)
         block = UIB(c1=64, c2=64, k=3, s=1, e=6.0).to(self.device)
-        
+
         self.assertTrue(block.use_res, "Residual connection should be True when s=1 and c1==c2")
         y = block(x)
         self.assertEqual(y.shape, (b, c, h, w))
@@ -31,7 +32,7 @@ class TestUIBBlock(unittest.TestCase):
         b, h, w = 2, 32, 32
         x = torch.randn(b, 32, h, w, device=self.device)
         block = UIB(c1=32, c2=64, k=3, s=1, e=6.0).to(self.device)
-        
+
         self.assertFalse(block.use_res, "Residual connection should be False when c1 != c2")
         y = block(x)
         self.assertEqual(y.shape, (b, 64, h, w))
@@ -41,7 +42,7 @@ class TestUIBBlock(unittest.TestCase):
         b, c_in, c_out, h, w = 2, 32, 64, 32, 32
         x = torch.randn(b, c_in, h, w, device=self.device)
         block = UIBDown(c1=c_in, c2=c_out, k=3, s=2, e=6.0).to(self.device)
-        
+
         y = block(x)
         self.assertEqual(y.shape, (b, c_out, h // 2, w // 2))
 
@@ -53,8 +54,8 @@ class TestUIBBlock(unittest.TestCase):
         y = se(x)
         self.assertEqual(y.shape, (b, c, h, w))
 
-    def test_load_trained_uib_checkpoint(self):
-        """Test loading trained YOLO11n-UIB weights and executing forward pass."""
+    def test_load_trained_uib_checkpoint_weights_dir(self):
+        """Test loading trained YOLO11n-UIB weights from weights/ directory."""
         import __main__
         __main__.UIB = UIB
         __main__.UIBDown = UIBDown
@@ -63,7 +64,7 @@ class TestUIBBlock(unittest.TestCase):
         register_uib_modules()
 
         from ultralytics import YOLO
-        weights_path = PROJECT_ROOT / "pretrain_backbone_yolo11n" / "train_with_colab" / "vrtsd_uib_p2_fix2" / "weights" / "best.pt"
+        weights_path = PROJECT_ROOT / "weights" / "yolo11n_uib_best.pt"
         self.assertTrue(weights_path.exists(), f"Weights file missing: {weights_path}")
 
         model = YOLO(str(weights_path))
@@ -78,10 +79,10 @@ class TestUIBBlock(unittest.TestCase):
         self.assertEqual(out_tensor.shape[0], 1)
         self.assertEqual(out_tensor.shape[1], 59 + 4, f"Output channels should be 63, got {out_tensor.shape[1]}")
 
-    def test_load_trained_baseline_checkpoint(self):
-        """Test loading trained baseline YOLO11n weights."""
+    def test_load_trained_baseline_checkpoint_weights_dir(self):
+        """Test loading trained baseline YOLO11n weights from weights/ directory."""
         from ultralytics import YOLO
-        baseline_path = PROJECT_ROOT / "yolo11n" / "runs" / "detect" / "train" / "weights" / "best.pt"
+        baseline_path = PROJECT_ROOT / "weights" / "yolo11n_baseline_best.pt"
         self.assertTrue(baseline_path.exists(), f"Baseline weights missing: {baseline_path}")
 
         model = YOLO(str(baseline_path))
@@ -95,6 +96,31 @@ class TestUIBBlock(unittest.TestCase):
         out_tensor = out[0] if isinstance(out, (list, tuple)) else out
         self.assertEqual(out_tensor.shape[0], 1)
         self.assertEqual(out_tensor.shape[1], 59 + 4)
+
+    def test_end_to_end_predict_nms(self):
+        """Test complete Ultralytics predict() inference pipeline including preprocessing and NMS."""
+        import __main__
+        __main__.UIB = UIB
+        __main__.UIBDown = UIBDown
+        __main__.ConvBNAct = ConvBNAct
+        __main__.SqueezeExcite = SqueezeExcite
+        register_uib_modules()
+
+        from ultralytics import YOLO
+        weights_path = PROJECT_ROOT / "weights" / "yolo11n_uib_best.pt"
+        model = YOLO(str(weights_path))
+
+        dummy_img = np.random.randint(0, 255, (640, 640, 3), dtype=np.uint8)
+        results = model.predict(source=dummy_img, imgsz=640, conf=0.25, iou=0.45, verbose=False)
+
+        self.assertIsNotNone(results)
+        self.assertEqual(len(results), 1)
+        res = results[0]
+        self.assertTrue(hasattr(res, "boxes"))
+        self.assertTrue(hasattr(res, "speed"))
+        self.assertIn("preprocess", res.speed)
+        self.assertIn("inference", res.speed)
+        self.assertIn("postprocess", res.speed)
 
 
 if __name__ == "__main__":
