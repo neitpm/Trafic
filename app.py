@@ -17,8 +17,8 @@ from ultralytics import YOLO
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-DEFAULT_WEIGHTS = PROJECT_ROOT / "pretrain_backbone_yolo11n" / "train_with_colab" / "vrtsd_uib_p2_fix2" / "weights" / "last.pt"
-ALT_WEIGHTS = PROJECT_ROOT / "pretrain_backbone_yolo11n" / "train_with_colab" / "vrtsd_uib_p2_fix2" / "weights" / "last.pt"
+DEFAULT_WEIGHTS = Path(os.getenv("TRAFFIC_SIGN_WEIGHTS", str(PROJECT_ROOT / "weights" / "yolo11n_uib_best.pt")))
+ALT_WEIGHTS = PROJECT_ROOT / "pretrain_backbone_yolo11n" / "train_with_colab" / "vrtsd_uib_p2_fix2" / "weights" / "best.pt"
 PRED_DIR = PROJECT_ROOT / "outputs" / "predictions"
 PRED_DIR.mkdir(parents=True, exist_ok=True)
 
