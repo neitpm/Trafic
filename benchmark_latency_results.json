@@ -1,0 +1,128 @@
+{
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "python_version": "3.12.10",
+    "pytorch_version": "2.12.0.dev20260408+cu128",
+    "cuda_available": true,
+    "device_name": "NVIDIA GeForce RTX 5060 Ti",
+    "vram_gb": 15.93,
+    "cuda_version": "12.8",
+    "cudnn_version": 92000
+  },
+  "models": {
+    "YOLO11n Baseline": {
+      "weights_size_mb": 5.25,
+      "total_params": 2601345,
+      "params_m": 2.6,
+      "raw_forward": {
+        "gpu_640": {
+          "mean_ms": 7.5,
+          "std_ms": 1.26,
+          "p50_ms": 7.11,
+          "p95_ms": 10.17,
+          "p99_ms": 12.07,
+          "fps": 133.4
+        },
+        "gpu_832": {
+          "mean_ms": 7.21,
+          "std_ms": 0.94,
+          "p50_ms": 6.97,
+          "p95_ms": 9.01,
+          "p99_ms": 10.92,
+          "fps": 138.7
+        },
+        "cpu_640": {
+          "mean_ms": 36.55,
+          "std_ms": 3.46,
+          "p50_ms": 36.07,
+          "p95_ms": 42.98,
+          "p99_ms": 46.5,
+          "fps": 27.4
+        }
+      },
+      "end_to_end_predict": {
+        "gpu_640": {
+          "mean_ms": 7.53,
+          "std_ms": 1.07,
+          "p50_ms": 7.23,
+          "p95_ms": 9.98,
+          "p99_ms": 11.49,
+          "fps": 132.8
+        },
+        "gpu_832": {
+          "mean_ms": 8.03,
+          "std_ms": 1.23,
+          "p50_ms": 7.68,
+          "p95_ms": 10.43,
+          "p99_ms": 13.55,
+          "fps": 124.5
+        },
+        "cpu_640": {
+          "mean_ms": 29.65,
+          "std_ms": 2.76,
+          "p50_ms": 30.1,
+          "p95_ms": 33.64,
+          "p99_ms": 33.98,
+          "fps": 33.7
+        }
+      }
+    },
+    "YOLO11n-UIB (Proposed)": {
+      "weights_size_mb": 61.96,
+      "total_params": 31964326,
+      "params_m": 31.96,
+      "raw_forward": {
+        "gpu_640": {
+          "mean_ms": 17.61,
+          "std_ms": 1.74,
+          "p50_ms": 17.02,
+          "p95_ms": 20.99,
+          "p99_ms": 25.59,
+          "fps": 56.8
+        },
+        "gpu_832": {
+          "mean_ms": 27.88,
+          "std_ms": 0.46,
+          "p50_ms": 27.9,
+          "p95_ms": 28.53,
+          "p99_ms": 28.64,
+          "fps": 35.9
+        },
+        "cpu_640": {
+          "mean_ms": 414.52,
+          "std_ms": 26.64,
+          "p50_ms": 414.01,
+          "p95_ms": 464.2,
+          "p99_ms": 480.31,
+          "fps": 2.4
+        }
+      },
+      "end_to_end_predict": {
+        "gpu_640": {
+          "mean_ms": 18.61,
+          "std_ms": 0.63,
+          "p50_ms": 18.55,
+          "p95_ms": 19.61,
+          "p99_ms": 20.64,
+          "fps": 53.7
+        },
+        "gpu_832": {
+          "mean_ms": 29.35,
+          "std_ms": 0.46,
+          "p50_ms": 29.4,
+          "p95_ms": 30.03,
+          "p99_ms": 30.1,
+          "fps": 34.1
+        },
+        "cpu_640": {
+          "mean_ms": 263.8,
+          "std_ms": 15.38,
+          "p50_ms": 260.71,
+          "p95_ms": 297.31,
+          "p99_ms": 305.88,
+          "fps": 3.8
+        }
+      }
+    }
+  }
+}
