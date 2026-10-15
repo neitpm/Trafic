@@ -64,16 +64,23 @@ To ensure scientific honesty and consistency between reported documentation and 
 
 ## 4. Detection Accuracy & Experimental Artifacts
 
-Historical validation results tracked across training logs on the Vietnamese Real-world Traffic Sign Dataset (VRTSD, 58 classes):
+To maintain methodological consistency, all reported validation metrics correspond to the **Best mAP@[0.5:0.95] Checkpoint Policy** derived from official training logs on the Vietnamese Real-world Traffic Sign Dataset (VRTSD, 58 classes):
 
-| Metric | Baseline YOLO11n | YOLO11n-UIB (Tracked Run) | Evaluation Criteria |
+| Metric | Baseline YOLO11n (best.pt) | YOLO11n-UIB (best.pt) | Metric Selection Policy |
 | :--- | :---: | :---: | :--- |
-| **Best mAP@0.5** | **0.8389 (83.9%)** | **0.8848 (88.5%)** | Peak mAP50 recorded on validation split |
-| **Best mAP@[0.5:0.95]** | **0.6822 (68.2%)** | **0.7131 (71.3%)** | Peak COCO mAP recorded (Epoch 151) |
-| **Precision** | **0.8895 (88.9%)** | **0.9241 (92.4%)** | Detection confidence thresholding |
-| **Recall** | **0.7888 (78.9%)** | **0.8454 (84.5%)** | Positive detection rate |
-| **Training Recipe** | 100 epochs, imgsz=640, bs=16, SGD/auto | 200 epochs, imgsz=832, bs=8, AdamW | Distinct optimization budgets |
+| **Optimal Epoch** | **Epoch 85** | **Epoch 151** | Selected strictly by peak mAP50-95 |
+| **mAP@[0.5:0.95] (Peak)** | **0.6970 (69.7%)** | **0.7131 (71.3%)** | Primary ranking criteria |
+| **mAP@0.5** | **0.8488 (84.9%)** | **0.8848 (88.5%)** | Evaluated at the optimal epoch |
+| **Precision** | **0.8761 (87.6%)** | **0.9194 (91.9%)** | Evaluated at the optimal epoch |
+| **Recall** | **0.7822 (78.2%)** | **0.8453 (84.5%)** | Evaluated at the optimal epoch |
+| **Training Budget** | 100 epochs, imgsz=640, bs=16, SGD/auto | 200 epochs, imgsz=832, bs=8, AdamW | Confounding recipe differences |
 
+### Checkpoint Provenance & Artifact Integrity
+
+| Checkpoint File | Fused Parameters | Size | SHA-256 Checksum | Source Log |
+| :--- | :---: | :---: | :---: | :--- |
+| `weights/yolo11n_baseline_best.pt` | 2,593,657 | 5.25 MB | `bfce0abf23c38e3274e50779f9083b5d0d5cdd4c5070beaa55fa97a9f3df703e` | yolo11n/runs/detect/train/results.csv |
+| `weights/yolo11n_uib_best.pt` | 31,948,198 | 61.96 MB | `bca8ac397d978dbd30ef4430b5970f5e52643c241ba1edcb0f514fb4dcea4c8f` | pretrain_backbone_yolo11n/train_with_colab/vrtsd_uib_p2_fix2/results.csv |
 > **Methodological & Reproducibility Disclaimer:**  
 > The higher mAP observed in the UIB variant was achieved under an extended training budget (200 epochs vs. 100 epochs) and higher input resolution (832x832 vs. 640x640) with ~12x model capacity. While these metrics confirm the strong detection capability of the trained checkpoint, isolating the exact percentage gain attributable strictly to the UIB architecture requires a controlled ablation under identical training recipes and seeds.
 
