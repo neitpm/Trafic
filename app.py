@@ -17,8 +17,8 @@ from ultralytics import YOLO
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-DEFAULT_WEIGHTS = Path(os.getenv("TRAFFIC_SIGN_WEIGHTS", str(PROJECT_ROOT / "weights" / "yolo11n_uib_best.pt")))
-ALT_WEIGHTS = PROJECT_ROOT / "pretrain_backbone_yolo11n" / "train_with_colab" / "vrtsd_uib_p2_fix2" / "weights" / "best.pt"
+DEFAULT_WEIGHTS = Path(os.getenv("TRAFFIC_SIGN_WEIGHTS", str(PROJECT_ROOT / "weights" / "yolo11n_baseline_best.pt")))
+ALT_WEIGHTS = PROJECT_ROOT / "weights" / "yolo11n_uib_best.pt"
 PRED_DIR = PROJECT_ROOT / "outputs" / "predictions"
 PRED_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -375,16 +375,63 @@ def run_streamlit_app():
         st.header("Cấu hình")
         mode = st.selectbox("Chọn chế độ", ["Image", "Video", "Webcam"])
         
-        # Model selection presets
+        # Model presets definition with metadata
+        env_weights = os.getenv("TRAFFIC_SIGN_WEIGHTS", "")
+        default_baseline_path = "weights/yolo11n_baseline_best.pt"
+        if env_weights:
+            default_baseline_path = env_weights
+
         model_presets = {
-            "YOLO11n Baseline (Production - Recommended: 70.3% mAP, 5.8ms)": "weights/yolo11n_baseline_best.pt",
-            "YOLO11n-UIB-Nano + KD (Lightweight: 2.48M, 64.1% mAP)": "runs/controlled/uib_nano_kd_seed42/weights/best.pt",
-            "YOLO11n-UIB Original (High-Capacity 32M, 70.9% mAP)": "weights/yolo11n_uib_best.pt",
-            "Custom path...": ""
+            "YOLO11n Baseline (Recommended model: 70.27% mAP, 2.61M params, 5.79ms)": {
+                "path": default_baseline_path,
+                "params": "2.61M",
+                "flops": "6.5 GFLOPs",
+                "map": "70.27% mAP@[0.5:0.95]",
+                "latency": "5.79 ms (172.8 FPS on RTX 5060 Ti)",
+                "type": "Recommended benchmark baseline"
+            },
+            "YOLO11n-UIB-Nano + KD (Research - dis=1.0: 64.05% mAP, 2.48M params)": {
+                "path": "runs/controlled/uib_nano_kd_seed42/weights/best.pt",
+                "params": "2.48M (-5.1%)",
+                "flops": "5.6 GFLOPs (-13.8%)",
+                "map": "64.05% mAP@[0.5:0.95]",
+                "latency": "6.93 ms (144.4 FPS on RTX 5060 Ti)",
+                "type": "Research ablation (Knowledge Distillation)"
+            },
+            "YOLO11n-UIB Original (Research - High Capacity 32M, 70.86% mAP)": {
+                "path": "weights/yolo11n_uib_best.pt",
+                "params": "31.78M",
+                "flops": "51.9 GFLOPs",
+                "map": "70.86% mAP@[0.5:0.95]",
+                "latency": "15.20 ms (60.9 FPS on RTX 5060 Ti)",
+                "type": "Research ablation (Unconstrained Capacity)"
+            },
+            "Custom path...": {
+                "path": "",
+                "params": "N/A",
+                "flops": "N/A",
+                "map": "N/A",
+                "latency": "N/A",
+                "type": "User-specified custom checkpoint"
+            }
         }
+        
         chosen_preset = st.selectbox("Chọn mô hình", list(model_presets.keys()), index=0)
-        default_path = model_presets[chosen_preset] if model_presets[chosen_preset] else get_default_weights()
+        preset_info = model_presets[chosen_preset]
+        
+        default_path = preset_info["path"] if preset_info["path"] else get_default_weights()
         weights_path = st.text_input("Đường dẫn weights", value=default_path)
+        
+        # Display model metadata card in sidebar
+        st.markdown(f"**Loại mô hình:** {preset_info['type']}")
+        col_m1, col_m2 = st.columns(2)
+        with col_m1:
+            st.metric("Params", preset_info["params"])
+            st.metric("mAP50-95", preset_info["map"].split()[0] if preset_info["map"] != "N/A" else "N/A")
+        with col_m2:
+            st.metric("FLOPs", preset_info["flops"].split()[0] if preset_info["flops"] != "N/A" else "N/A")
+            st.metric("Latency", preset_info["latency"].split()[0] + " ms" if preset_info["latency"] != "N/A" else "N/A")
+            
         imgsz = st.selectbox("Image size", [256, 320, 416, 512, 640], index=1)
         conf = st.slider("Confidence", 0.05, 0.95, 0.25, 0.05)
         iou = st.slider("IoU", 0.10, 0.95, 0.45, 0.05)
@@ -395,8 +442,13 @@ def run_streamlit_app():
         if st.checkbox("Hiện bảng class"):
             st.json(VRTSD_CLASS_NAMES)
 
+    # Check if weights file exists with clear user-friendly warning instead of crashing
     if not weights_path or not os.path.exists(weights_path):
-        st.error("Không tìm thấy file weights.")
+        st.warning(
+            f"⚠️ Không tìm thấy file checkpoint tại: `{weights_path}`.\n\n"
+            f"- Nếu bạn đang chạy chế độ nghiên cứu (UIB-Nano KD), hãy đảm bảo checkpoint đã được tải về hoặc giải nén.\n"
+            f"- Khuyến nghị sử dụng mô hình mặc định: `weights/yolo11n_baseline_best.pt` hoặc truyền biến môi trường `TRAFFIC_SIGN_WEIGHTS`."
+        )
         st.stop()
 
     model = load_model(weights_path)

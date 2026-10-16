@@ -1,0 +1,40 @@
+# Ignore Git and IDE metadata
+.git/
+.gitignore
+.github/
+.vscode/
+.idea/
+
+# Ignore local virtual environments and caches
+venv/
+.env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+
+# Ignore heavy training datasets and raw splits
+datasets/
+datasets/VR-TSD-2/
+
+# Ignore heavy training artifacts and checkpoints
+runs/
+pretrain_backbone_yolo11n/runs/
+yolo11n/runs/
+outputs/logs/
+outputs/predictions/
+outputs/metrics/
+
+# Ignore heavy research weights (only default baseline checkpoint needed in Docker)
+weights/yolo11n_uib_best.pt
+weights/yolo26n.pt
+pretrain_backbone_yolo11n/train_with_colab/vrtsd_uib_p2_fix2/weights/
+*.onnx
+*.engine
+*.pth
+
+# Ignore notebooks and documentation source files
+*.ipynb
+pretrain_backbone_yolo11n/train_with_colab/
