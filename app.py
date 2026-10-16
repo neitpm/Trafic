@@ -421,14 +421,28 @@ def run_streamlit_app():
             }
         }
         
-        chosen_preset = st.selectbox("Chọn mô hình", list(model_presets.keys()), index=0)
-        preset_info = model_presets[chosen_preset]
+        # Check availability of each preset on disk
+        available_presets = {}
+        for name, info in model_presets.items():
+            p = info["path"]
+            exists = bool(p and os.path.exists(p))
+            info["exists"] = exists
+            available_presets[name] = info
+
+        chosen_preset = st.selectbox("Chọn mô hình", list(available_presets.keys()), index=0)
+        preset_info = available_presets[chosen_preset]
         
         default_path = preset_info["path"] if preset_info["path"] else get_default_weights()
         weights_path = st.text_input("Đường dẫn weights", value=default_path)
         
         # Display model metadata card in sidebar
         st.markdown(f"**Loại mô hình:** {preset_info['type']}")
+        if not preset_info["exists"] and preset_info["path"]:
+            st.error("⚠️ Checkpoint này không có sẵn trong image Docker deployment!")
+            if st.button("🔄 Quay lại YOLO11n Baseline"):
+                st.rerun()
+        else:
+            st.success("✅ Checkpoint đã sẵn sàng")
         col_m1, col_m2 = st.columns(2)
         with col_m1:
             st.metric("Params", preset_info["params"])
@@ -455,16 +469,24 @@ def run_streamlit_app():
         if st.checkbox("Hiện bảng class"):
             st.json(VRTSD_CLASS_NAMES)
 
-    # Check if weights file exists with clear user-friendly warning instead of crashing
+    # Check if weights file exists with clear user-friendly warning and auto-fallback
+    actual_weights_path = weights_path
     if not weights_path or not os.path.exists(weights_path):
-        st.warning(
-            f"⚠️ Không tìm thấy file checkpoint tại: `{weights_path}`.\n\n"
-            f"- Nếu bạn đang chạy chế độ nghiên cứu (UIB-Nano KD), hãy đảm bảo checkpoint đã được tải về hoặc giải nén.\n"
-            f"- Khuyến nghị sử dụng mô hình mặc định: `weights/yolo11n_baseline_best.pt` hoặc truyền biến môi trường `TRAFFIC_SIGN_WEIGHTS`."
-        )
-        st.stop()
+        baseline_path = "weights/yolo11n_baseline_best.pt"
+        if os.path.exists(baseline_path):
+            st.warning(
+                f"⚠️ Không tìm thấy file checkpoint: `{weights_path}`.\n\n"
+                f"💡 **Tự động chuyển sang mô hình mặc định: `{baseline_path}` (YOLO11n Baseline)** để tiếp tục hoạt động."
+            )
+            actual_weights_path = baseline_path
+        else:
+            st.error(
+                f"❌ Không tìm thấy checkpoint tại `{weights_path}` và không có file fallback `{baseline_path}`.\n"
+                f"Vui lòng kiểm tra lại đường dẫn weights hoặc truyền biến môi trường `TRAFFIC_SIGN_WEIGHTS`."
+            )
+            st.stop()
 
-    model = load_model(weights_path)
+    model = load_model(actual_weights_path)
 
     if mode == "Image":
         uploaded_image = st.file_uploader("Tải ảnh lên", type=["jpg", "jpeg", "png", "jfif"])
