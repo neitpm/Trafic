@@ -65,8 +65,24 @@
       "recall": 0.7772,
       "val_box_loss": 1.028
     },
-    "uib_nano_kd": {
-      "model": "YOLO11n-UIB-Nano + Knowledge Distillation (Teacher: YOLO11n Baseline, dis=1.0)",
+    "uib_nano_kd_dis0.5": {
+      "model": "YOLO11n-UIB-Nano + KD (Teacher: YOLO11n Baseline, dis=0.5)",
+      "config": "configs/models/yolo11n_uib_nano.yaml",
+      "params_unfused": 2482774,
+      "params_fused": 2476566,
+      "gflops": 5.6,
+      "fused_latency_mean_ms": 6.93,
+      "fused_latency_median_ms": 6.50,
+      "fps": 144.4,
+      "peak_epoch": 198,
+      "map50_95": 0.6359,
+      "map50": 0.8185,
+      "precision": 0.8971,
+      "recall": 0.7709,
+      "val_box_loss": 0.9223
+    },
+    "uib_nano_kd_dis1.0": {
+      "model": "YOLO11n-UIB-Nano + KD (Teacher: YOLO11n Baseline, dis=1.0)",
       "config": "configs/models/yolo11n_uib_nano.yaml",
       "params_unfused": 2482774,
       "params_fused": 2476566,
@@ -81,10 +97,21 @@
       "recall": 0.7706,
       "val_box_loss": 0.9166
     },
-    "distillation_impact": {
-      "map50_95_gain_vs_scratch": 0.0285,
-      "val_box_loss_reduction": -0.1114,
-      "map50_95_vs_baseline": -0.0622
+    "uib_nano_kd_dis2.0": {
+      "model": "YOLO11n-UIB-Nano + KD (Teacher: YOLO11n Baseline, dis=2.0)",
+      "config": "configs/models/yolo11n_uib_nano.yaml",
+      "params_unfused": 2482774,
+      "params_fused": 2476566,
+      "gflops": 5.6,
+      "fused_latency_mean_ms": 6.93,
+      "fused_latency_median_ms": 6.50,
+      "fps": 144.4,
+      "peak_epoch": 200,
+      "map50_95": 0.6208,
+      "map50": 0.7985,
+      "precision": 0.8208,
+      "recall": 0.7595,
+      "val_box_loss": 0.9475
     }
   }
 }

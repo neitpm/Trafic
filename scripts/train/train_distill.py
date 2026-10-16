@@ -51,7 +51,7 @@ def main():
     output_dir = PROJECT_ROOT / "runs" / "controlled"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    run_name = f"uib_nano_kd_seed{args.seed}"
+    run_name = f"uib_nano_kd_dis{args.dis}_seed{args.seed}"
 
     print("=" * 65)
     print("KNOWLEDGE DISTILLATION (KD) TRAINING PIPELINE")

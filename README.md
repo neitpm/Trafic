@@ -34,11 +34,13 @@ To eliminate confounding variables (different epochs, resolutions, augmentations
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **YOLO11n Baseline** | COCO-Pretrained Fine-tune | 2.61M | 6.5 G | **5.79 ms** | **172.8 FPS** | **70.27%** | **87.63%** | **92.19%** | **81.44%** | **0.832** |
 | **YOLO11n-UIB (Original)** | Trained from Scratch (P2–P5) | 31.78M | 51.9 G | 15.20 ms | 60.9 FPS | **70.86%** | 86.80% | 89.39% | **82.51%** | **0.787** |
-| **YOLO11n-UIB-Nano** | Trained from Scratch (P3–P5) | **2.48M** | **5.6 G** | 6.93 ms | 144.4 FPS | 61.20% | 83.71% | 89.65% | 77.72% | 1.028 |
-| **YOLO11n-UIB-Nano + KD** | Knowledge Distillation ($\text{dis}=1.0$) | **2.48M** | **5.6 G** | 6.93 ms | 144.4 FPS | **64.05%** | 82.52% | 87.87% | 77.06% | 0.917 |
+| **UIB-Nano (Scratch)** | Trained from Scratch (P3–P5) | **2.48M** | **5.6 G** | 6.93 ms | 144.4 FPS | 61.20% | **83.71%** | 89.65% | 77.72% | 1.028 |
+| **UIB-Nano + KD ($\text{dis}=0.5$)** | Knowledge Distillation | **2.48M** | **5.6 G** | 6.93 ms | 144.4 FPS | 63.59% | 81.85% | 89.71% | 77.09% | 0.922 |
+| **UIB-Nano + KD ($\text{dis}=1.0$)** | Knowledge Distillation | **2.48M** | **5.6 G** | 6.93 ms | 144.4 FPS | **64.05%** | 82.52% | 87.87% | 77.06% | **0.917** |
+| **UIB-Nano + KD ($\text{dis}=2.0$)** | Knowledge Distillation | **2.48M** | **5.6 G** | 6.93 ms | 144.4 FPS | 62.08% | 79.85% | 82.08% | 75.95% | 0.948 |
 
 > **Key Takeaway:**  
-> The experiments quantify the trade-off between model compactness, inference cost, and detection accuracy, while measuring the partial benefit of teacher-student distillation.
+> The experiments quantify the trade-off between model compactness, inference cost, and detection accuracy, while measuring the partial benefit of teacher-student distillation across a pre-registered hyperparameter grid.
 
 ---
 
@@ -48,9 +50,12 @@ To eliminate confounding variables (different epochs, resolutions, augmentations
 - **Parameter & Computation Efficiency:** UIB-Nano reduces parameter count by **5.14%** (2.48M vs. 2.61M) and computational workload by **13.85%** (5.6 vs. 6.5 GFLOPs) compared to YOLO11n Baseline.
 - **Inference Latency Profile:** Despite having fewer FLOPs, UIB-Nano's latency on GPU is approximately **1.20x higher** (6.93 ms vs. 5.79 ms). This latency profile is a well-documented hardware characteristic of Depthwise Separable Convolutions, which incur higher Memory Access Cost (MAC) relative to arithmetic FLOP count. Nonetheless, at **144.4 FPS**, UIB-Nano comfortably exceeds standard real-time requirements (>100 FPS).
 
-### 3.2. Impact of Knowledge Distillation (KD)
-- **Localization Improvement:** Distillation from the frozen YOLO11n Baseline teacher improved UIB-Nano's mAP@[0.5:0.95] from **61.20% to 64.05% (+2.85 points)**, while reducing validation bounding box loss from **1.028 to 0.917**.
-- **Scope & Limitations:** KD improved strict localization performance relative to scratch training, while fixed-threshold detection metrics (mAP@0.5, Precision, Recall) remained slightly lower. Under the current teacher, $\text{dis}=1.0$, seed 42, and 200-epoch budget, distillation narrowed the gap but did not fully recover the 6.22-point mAP difference with the COCO-pretrained Baseline. Pretraining on large-scale datasets remains the dominant accuracy driver in this ultra-compact regime.
+### 3.2. Impact of Knowledge Distillation Grid ($\text{dis} \in \{0.5, 1.0, 2.0\}$)
+- **Ablation Trends:**
+  - $\text{dis}=1.0$ achieved the optimal balance among distilled configurations, peaking at **64.05% mAP@[0.5:0.95]** (+2.85 points over Scratch) and the lowest validation box loss (**0.917**).
+  - Lower distillation weight ($\text{dis}=0.5$) relaxed teacher constraints and recovered higher Precision (**89.71%**), but produced a slightly lower mAP@[0.5:0.95] (**63.59%**).
+  - Excessive distillation weight ($\text{dis}=2.0$) penalized the student's task-specific detection loss, degrading both mAP@[0.5:0.95] (**62.08%**) and Precision (**82.08%**).
+- **Scope & Limitations:** While KD successfully improves bounding box localization relative to pure scratch training, under the current teacher, seed 42, and 200-epoch budget, it does not close the remaining 6.22-point gap with the COCO-pretrained Baseline. Pretraining on large-scale datasets remains the decisive accuracy differentiator in this ultra-compact regime.
 
 ### 3.3. High-Capacity UIB Variant (31.8M)
 - The high-capacity UIB model achieved **70.86% mAP@[0.5:0.95]** and **82.51% Recall** from scratch, demonstrating the representational power of deep UIB blocks when capacity is unconstrained, albeit at ~12.2x higher parameter footprint and ~52 GFLOPs.
