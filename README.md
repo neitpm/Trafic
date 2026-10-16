@@ -3,6 +3,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
 [![Ultralytics](https://img.shields.io/badge/Ultralytics-8.4+-00D2FF.svg)](https://github.com/ultralytics/ultralytics)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model%20Release-yellow.svg)](https://huggingface.co/neitpm/traffic-sign-yolo11-benchmark)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-FF4B4B.svg)](https://streamlit.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -26,10 +27,11 @@ An empirical research and engineering benchmark investigating the integration of
   - [6.2. Capacity vs. Accuracy & Latency Trade-Off Analysis](#62-capacity-vs-accuracy--latency-trade-off-analysis)
 - [7. Interactive Streamlit Demo](#7-interactive-streamlit-demo)
 - [8. Containerized Docker Deployment](#8-containerized-docker-deployment)
-- [9. Repository Structure](#9-repository-structure)
-- [10. Reproducibility Guide](#10-reproducibility-guide)
-- [11. Technical Limitations & Engineering Integrity](#11-technical-limitations--engineering-integrity)
-- [12. License](#12-license)
+- [9. Hugging Face Model Release](#9-hugging-face-model-release)
+- [10. Repository Structure](#10-repository-structure)
+- [11. Reproducibility Guide](#11-reproducibility-guide)
+- [12. Technical Limitations & Engineering Integrity](#12-technical-limitations--engineering-integrity)
+- [13. License](#13-license)
 
 ---
 
@@ -258,7 +260,46 @@ docker run --rm -p 8501:8501 \
 
 ---
 
-## 9. Repository Structure
+## 9. Hugging Face Model Release
+
+Model checkpoints and reproducible inference artifacts are available on Hugging Face:
+
+🤗 **[Hugging Face Model Repository: neitpm/traffic-sign-yolo11-benchmark](https://huggingface.co/neitpm/traffic-sign-yolo11-benchmark)**
+
+The default recommended checkpoint is the COCO-pretrained **YOLO11n Baseline**. UIB-Nano and Knowledge Distillation checkpoints are provided as research ablations.
+
+### Download Instructions
+
+```bash
+# Install Hugging Face Hub CLI
+pip install huggingface_hub
+
+# Download entire release bundle
+huggingface-cli download \
+  neitpm/traffic-sign-yolo11-benchmark \
+  --local-dir hf_models
+```
+
+### Released Artifacts Mapping
+
+| Artifact File | Architecture | Parameters | mAP@[0.5:0.95] | Role |
+| :--- | :--- | :---: | :---: | :--- |
+| `models/yolo11n_baseline_best.pt` | YOLO11n Baseline | 2.61M | **70.27%** | **Recommended benchmark/demo model** |
+| `models/yolo11n_uib_nano_best.pt` | YOLO11n-UIB-Nano | 2.48M | 61.20% | Compact UIB research model (Scratch) |
+| `models/yolo11n_uib_nano_kd_best.pt`| YOLO11n-UIB-Nano + KD | 2.48M | **64.05%** | Knowledge-distilled research model ($\text{dis}=1.0$) |
+| `configs/vrtsd.yaml` | Dataset configuration | - | - | 58 Vietnamese traffic sign classes |
+| `configs/yolo11n_uib_nano.yaml` | Model specification | - | - | Lightweight UIB-Nano definition |
+| `configs/benchmark_recipe_manifest.json` | Manifest metadata | - | - | Machine-readable experimental parameters |
+| `checksums.sha256` | Cryptographic hashes | - | - | SHA-256 integrity verification |
+
+To verify downloaded artifacts:
+```bash
+python scripts/verify_hf_release.py --repo_id neitpm/traffic-sign-yolo11-benchmark
+```
+
+---
+
+## 10. Repository Structure
 
 ```bash
 Trafic/
@@ -301,7 +342,7 @@ Trafic/
 
 ---
 
-## 10. Reproducibility Guide
+## 11. Reproducibility Guide
 
 To reproduce the exact benchmark results from scratch:
 
@@ -351,7 +392,7 @@ python scripts/benchmark_latency.py --weights runs/controlled/uib_nano_kd_seed42
 
 ---
 
-## 11. Technical Limitations & Engineering Integrity
+## 12. Technical Limitations & Engineering Integrity
 
 In accordance with transparent machine learning reporting standards:
 1. **Model Status:** **YOLO11n Baseline is the recommended model** for general deployment, attaining superior precision (92.19%), recall (81.44%), mAP@[0.5:0.95] (70.27%), and lower latency (5.79 ms).
@@ -361,6 +402,6 @@ In accordance with transparent machine learning reporting standards:
 
 ---
 
-## 12. License
+## 13. License
 
 This repository is distributed under the [MIT License](LICENSE). Third-party dependencies and model components follow their respective upstream licenses.
