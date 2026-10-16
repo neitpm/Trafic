@@ -158,7 +158,7 @@ To ensure scientific reproducibility and eliminate confounding variables, all mo
 | **Split Partition** | 5,668 train (70%) / 1,259 validation (15%) / 1,151 test (15%) |
 | **Resolution** | $640 \times 640$ pixels |
 | **Training Budget** | 200 epochs, batch size 8 |
-| **Optimizer** | AdamW ($\text{lr}_0 = 0.001$, $\text{lrf} = 0.01$, $\text{weight\_decay} = 0.0005$, $\text{momentum} = 0.937$) |
+| **Optimizer** | AdamW (`lr0=0.001`, `lrf=0.01`, `weight_decay=0.0005`, `momentum=0.937`) |
 | **LR Schedule** | Cosine Annealing with 3.0 warmup epochs |
 | **Augmentation** | Mosaic ($1.0$), Mixup ($0.05$), Close Mosaic at epoch 180 (final 20 epochs); **No horizontal flip** (`fliplr=0.0`) to preserve directional sign semantics |
 | **Hardware** | Workstation equipped with NVIDIA GeForce RTX 5060 Ti (16GB VRAM, CUDA 12.8) |
