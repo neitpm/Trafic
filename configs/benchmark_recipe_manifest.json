@@ -1,0 +1,90 @@
+{
+  "comparison_track": "Strict Controlled Matched Recipe (200 Epochs)",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 5060 Ti (16GB VRAM)",
+    "cuda_version": "12.8",
+    "torch_version": "2.12.0.dev20260408+cu128",
+    "ultralytics_version": "8.4.177"
+  },
+  "dataset": {
+    "name": "VR-TSD-2 (Vietnamese Real-world Traffic Sign Dataset)",
+    "num_classes": 58,
+    "train_images": 5668,
+    "val_images": 1259,
+    "test_images": 1151
+  },
+  "matched_hyperparameters": {
+    "imgsz": 640,
+    "epochs": 200,
+    "batch": 8,
+    "seed": 42,
+    "optimizer": "AdamW",
+    "lr0": 0.001,
+    "lrf": 0.01,
+    "momentum": 0.937,
+    "weight_decay": 0.0005,
+    "warmup_epochs": 3.0,
+    "cos_lr": true,
+    "fliplr": 0.0,
+    "flipud": 0.0,
+    "mosaic": 1.0,
+    "mixup": 0.05,
+    "close_mosaic": 20,
+    "patience": 50
+  },
+  "results": {
+    "baseline": {
+      "model": "YOLO11n Baseline (COCO-Pretrained)",
+      "weights": "weights/yolo11n.pt",
+      "params_unfused": 2610902,
+      "params_fused": 2610902,
+      "gflops": 6.5,
+      "fused_latency_mean_ms": 5.79,
+      "fused_latency_median_ms": 5.26,
+      "fps": 172.8,
+      "peak_epoch": 186,
+      "map50_95": 0.7027,
+      "map50": 0.8763,
+      "precision": 0.9219,
+      "recall": 0.8144,
+      "val_box_loss": 0.832
+    },
+    "uib_nano_scratch": {
+      "model": "YOLO11n-UIB-Nano (Trained from Scratch)",
+      "config": "configs/models/yolo11n_uib_nano.yaml",
+      "params_unfused": 2482774,
+      "params_fused": 2476566,
+      "gflops": 5.6,
+      "fused_latency_mean_ms": 6.93,
+      "fused_latency_median_ms": 6.50,
+      "fps": 144.4,
+      "peak_epoch": 189,
+      "map50_95": 0.6120,
+      "map50": 0.8371,
+      "precision": 0.8965,
+      "recall": 0.7772,
+      "val_box_loss": 1.028
+    },
+    "uib_nano_kd": {
+      "model": "YOLO11n-UIB-Nano + Knowledge Distillation (Teacher: YOLO11n Baseline, dis=1.0)",
+      "config": "configs/models/yolo11n_uib_nano.yaml",
+      "params_unfused": 2482774,
+      "params_fused": 2476566,
+      "gflops": 5.6,
+      "fused_latency_mean_ms": 6.93,
+      "fused_latency_median_ms": 6.50,
+      "fps": 144.4,
+      "peak_epoch": 184,
+      "map50_95": 0.6405,
+      "map50": 0.8252,
+      "precision": 0.8787,
+      "recall": 0.7706,
+      "val_box_loss": 0.9166
+    },
+    "distillation_impact": {
+      "map50_95_gain_vs_scratch": 0.0285,
+      "val_box_loss_reduction": -0.1114,
+      "map50_95_vs_baseline": -0.0622
+    }
+  }
+}

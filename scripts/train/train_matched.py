@@ -18,8 +18,8 @@ from src.models.register import register_uib_modules
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Unified Matched Recipe Training for VR-TSD Traffic Signs")
-    parser.add_argument("--model-type", type=str, choices=["baseline", "uib"], required=True,
-                        help="Model architecture: 'baseline' (YOLO11n standard) or 'uib' (YOLO11n-UIB)")
+    parser.add_argument("--model-type", type=str, choices=["baseline", "uib", "uib_nano"], required=True,
+                        help="Model architecture: 'baseline', 'uib' (32M), or 'uib_nano' (2.48M)")
     parser.add_argument("--epochs", type=int, default=200, help="Number of training epochs")
     parser.add_argument("--imgsz", type=int, default=640, help="Input image resolution")
     parser.add_argument("--batch", type=int, default=8, help="Batch size (fits RTX 5060 Ti 16GB comfortably)")
@@ -58,18 +58,23 @@ def main():
 
     if args.model_type == "baseline":
         # Baseline uses standard pretrained YOLO11n checkpoint
-        pretrained_weights = PROJECT_ROOT / "yolo11n.pt"
+        pretrained_weights = PROJECT_ROOT / "weights" / "yolo11n.pt"
         if not pretrained_weights.exists():
-            pretrained_weights = PROJECT_ROOT / "pretrain_backbone_yolo11n" / "yolo11n.pt"
+            pretrained_weights = PROJECT_ROOT / "yolo11n.pt"
         model = YOLO(str(pretrained_weights))
         run_name = f"baseline_seed{args.seed}"
+    elif args.model_type == "uib_nano":
+        register_uib_modules()
+        model_yaml = PROJECT_ROOT / "configs" / "models" / "yolo11n_uib_nano.yaml"
+        model = YOLO(str(model_yaml))
+        run_name = f"uib_nano_seed{args.seed}"
     else:
         # Custom UIB backbone with registered modules
         register_uib_modules()
         model_yaml = PROJECT_ROOT / "configs" / "models" / "yolo11n_uib_backbone.yaml"
-        pretrained_weights = PROJECT_ROOT / "yolo11n.pt"
+        pretrained_weights = PROJECT_ROOT / "weights" / "yolo11n.pt"
         if not pretrained_weights.exists():
-            pretrained_weights = PROJECT_ROOT / "pretrain_backbone_yolo11n" / "yolo11n.pt"
+            pretrained_weights = PROJECT_ROOT / "yolo11n.pt"
 
         model = YOLO(str(model_yaml))
         model.load(str(pretrained_weights))
