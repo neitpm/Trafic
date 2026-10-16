@@ -267,12 +267,17 @@ def load_model(weights_path: str):
 
 
 def detect_on_frame(model, frame_bgr, imgsz=320, conf=0.25, iou=0.45, device="cpu"):
+    # Gracefully validate device to prevent crash when user or container selects GPU on CPU-only environment
+    actual_device = device
+    if str(device).lower() not in ["cpu"] and not torch.cuda.is_available():
+        actual_device = "cpu"
+
     results = model.predict(
         source=frame_bgr,
         imgsz=imgsz,
         conf=conf,
         iou=iou,
-        device=device,
+        device=actual_device,
         verbose=False
     )
 
@@ -435,7 +440,15 @@ def run_streamlit_app():
         imgsz = st.selectbox("Image size", [256, 320, 416, 512, 640], index=1)
         conf = st.slider("Confidence", 0.05, 0.95, 0.25, 0.05)
         iou = st.slider("IoU", 0.10, 0.95, 0.45, 0.05)
-        device = st.selectbox("Device", ["cpu", "0"], index=0)
+
+        # Dynamic hardware device detection
+        cuda_available = torch.cuda.is_available()
+        device_options = ["cpu"]
+        if cuda_available:
+            device_options.append("0")
+        device = st.selectbox("Device", device_options, index=0)
+        if not cuda_available:
+            st.caption("ℹ️ CUDA không khả dụng trên môi trường hiện tại (suy luận CPU).")
 
         st.markdown("---")
         st.write(f"Số class map cứng: {len(VRTSD_CLASS_NAMES)}")
