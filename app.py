@@ -374,7 +374,17 @@ def run_streamlit_app():
     with st.sidebar:
         st.header("Cấu hình")
         mode = st.selectbox("Chọn chế độ", ["Image", "Video", "Webcam"])
-        weights_path = st.text_input("Đường dẫn weights", value=get_default_weights())
+        
+        # Model selection presets
+        model_presets = {
+            "YOLO11n Baseline (Production - Recommended: 70.3% mAP, 5.8ms)": "weights/yolo11n_baseline_best.pt",
+            "YOLO11n-UIB-Nano + KD (Lightweight: 2.48M, 64.1% mAP)": "runs/controlled/uib_nano_kd_seed42/weights/best.pt",
+            "YOLO11n-UIB Original (High-Capacity 32M, 70.9% mAP)": "weights/yolo11n_uib_best.pt",
+            "Custom path...": ""
+        }
+        chosen_preset = st.selectbox("Chọn mô hình", list(model_presets.keys()), index=0)
+        default_path = model_presets[chosen_preset] if model_presets[chosen_preset] else get_default_weights()
+        weights_path = st.text_input("Đường dẫn weights", value=default_path)
         imgsz = st.selectbox("Image size", [256, 320, 416, 512, 640], index=1)
         conf = st.slider("Confidence", 0.05, 0.95, 0.25, 0.05)
         iou = st.slider("IoU", 0.10, 0.95, 0.45, 0.05)
