@@ -184,6 +184,9 @@ All measurements were conducted on the identical VR-TSD-2 validation split on th
 | **UIB-Nano + KD ($\text{dis}=1.0$)** | Distillation | **2.48M** | **5.6 G** | 6.93 ms | 144.4 | **64.05%** | 82.52% | 87.87% | 77.06% | **0.917** | **Best Distillation Candidate** |
 | **UIB-Nano + KD ($\text{dis}=2.0$)** | Distillation | **2.48M** | **5.6 G** | 6.93 ms | 144.4 | 62.08% | 79.85% | 82.08% | 75.95% | 0.948 | Research Grid Point ($\text{dis}=2.0$) |
 
+> [!NOTE]
+> **Parameter Counting Methodology:** Parameters are reported using the benchmark script's selected counting mode (Ultralytics default head allocation for 58 categories, rounded to two decimal places: ~2.61M for Baseline COCO-configured architecture, ~2.60M in raw tensor weights `2,601,345`, and `2,593,657` in fused post-BN inference state; ~2.48M for UIB-Nano). All comparisons maintain internal consistency across tables and manifests.
+
 ---
 
 ### 6.2. Capacity vs. Accuracy & Latency Trade-Off Analysis
