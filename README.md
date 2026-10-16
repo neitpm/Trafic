@@ -251,7 +251,7 @@ docker run --rm -p 8501:8501 \
 ```
 
 > [!NOTE]
-> The default container runs **CPU inference** unless configured with NVIDIA Container Toolkit (`--gpus all`). On modern multi-core CPUs, YOLO11n Baseline achieves real-time inference speeds of ~15–25 ms per frame.
+> The default container runs **CPU inference** unless configured with NVIDIA Container Toolkit (`--gpus all`). The container provides a CPU inference demo; latency depends on the host CPU and has not been standardized inside the image.
 
 ---
 
