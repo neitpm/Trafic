@@ -52,10 +52,11 @@ To eliminate confounding variables (different epochs, resolutions, augmentations
 
 ### 3.2. Impact of Knowledge Distillation Grid ($\text{dis} \in \{0.5, 1.0, 2.0\}$)
 - **Ablation Trends:**
-  - $\text{dis}=1.0$ achieved the optimal balance among distilled configurations, peaking at **64.05% mAP@[0.5:0.95]** (+2.85 points over Scratch) and the lowest validation box loss (**0.917**).
+  - The evaluated distillation weights exhibited a non-monotonic response across the tested range ($\text{dis} \in \{0.5, 1.0, 2.0\}$).
+  - $\text{dis}=1.0$ achieved the best validation mAP among the tested grid values, peaking at **64.05% mAP@[0.5:0.95]** (+2.85 points over Scratch) and the lowest validation box loss (**0.917**).
   - Lower distillation weight ($\text{dis}=0.5$) relaxed teacher constraints and recovered higher Precision (**89.71%**), but produced a slightly lower mAP@[0.5:0.95] (**63.59%**).
-  - Excessive distillation weight ($\text{dis}=2.0$) penalized the student's task-specific detection loss, degrading both mAP@[0.5:0.95] (**62.08%**) and Precision (**82.08%**).
-- **Scope & Limitations:** While KD successfully improves bounding box localization relative to pure scratch training, under the current teacher, seed 42, and 200-epoch budget, it does not close the remaining 6.22-point gap with the COCO-pretrained Baseline. Pretraining on large-scale datasets remains the decisive accuracy differentiator in this ultra-compact regime.
+  - Higher distillation weight ($\text{dis}=2.0$) penalized the student's task-specific detection loss, resulting in lower mAP@[0.5:0.95] (**62.08%**) and Precision (**82.08%**).
+- **Scope & Limitations:** While KD improved bounding box localization relative to pure scratch training, under this teacher, loss formulation, seed 42, and 200-epoch protocol, KD did not close the remaining 6.22-point gap to the COCO-pretrained Baseline. Pretraining on large-scale datasets remains a dominant factor in this ultra-compact regime.
 
 ### 3.3. High-Capacity UIB Variant (31.8M)
 - The high-capacity UIB model achieved **70.86% mAP@[0.5:0.95]** and **82.51% Recall** from scratch, demonstrating the representational power of deep UIB blocks when capacity is unconstrained, albeit at ~12.2x higher parameter footprint and ~52 GFLOPs.
